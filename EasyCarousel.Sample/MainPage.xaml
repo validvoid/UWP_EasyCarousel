@@ -1,0 +1,41 @@
+﻿<Page
+    x:Class="Marduk.Samples.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Marduk.Samples"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="using:Marduk.Controls"
+    mc:Ignorable="d">
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <controls:EasyCarousel x:Name="EasyCarousel" ItemWidth="300" SelectedIndex="8" ItemTapped="nc_ItemTapped" Duration="{Binding Value, ElementName=slider}">
+            <controls:EasyCarousel.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Image Source="{Binding Image}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Stretch="UniformToFill"/>
+                        <Grid HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Background="#88000000">
+                            <TextBlock Text="{Binding Name}" Foreground="White" Margin="6"/>
+                        </Grid>
+                    </Grid>
+                </DataTemplate>
+            </controls:EasyCarousel.ItemTemplate>
+        </controls:EasyCarousel>
+        <Button x:Name="button" Content="&lt;" HorizontalAlignment="Left" VerticalAlignment="Stretch" Click="button_Click"/>
+        <Button x:Name="button1" Content="&gt;" HorizontalAlignment="Right" VerticalAlignment="Stretch" Click="button1_Click"/>
+        <TextBlock Text="{Binding SelectedIndex, ElementName=EasyCarousel}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="48" Foreground="Red" Grid.Row="1" FontWeight="Bold"/>
+        <StackPanel Orientation="Vertical" Grid.Row="2" Margin="12">
+            <TextBlock x:Name="textBlock" TextWrapping="Wrap" Text="Duration:"/>
+            <TextBlock x:Name="textBlock1" HorizontalAlignment="Center" TextWrapping="Wrap" Text="{Binding Value, ElementName=slider}" VerticalAlignment="Top" Foreground="#FF0074FF" FontSize="20"/>
+            <Slider x:Name="slider" VerticalAlignment="Top" Maximum="1000" StepFrequency="10" Minimum="300" Value="300" Margin="0,12,0,0"/>
+        </StackPanel>
+    </Grid>
+</Page>
+
+
+
