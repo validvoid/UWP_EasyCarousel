@@ -99,28 +99,28 @@ namespace Marduk.Controls
             Visual carouselVisual = ElementCompositionPreview.GetElementVisual(this);
             _carouselCompositor = carouselVisual.Compositor;
 
-            this.ManipulationMode=ManipulationModes.TranslateX;
+            this.ManipulationMode = ManipulationModes.TranslateX;
 
             this.Tapped += OnTapped;
             this.ManipulationCompleted += OnManipulationCompleted;
         }
-        
+
         #region Event handlers
 
         private void OnTapped(object sender, TappedRoutedEventArgs args)
         {
             FrameworkElement fxElement = args.OriginalSource as FrameworkElement;
-            ItemTapped(sender, fxElement);
+            ItemTapped?.Invoke(sender, fxElement);
         }
 
         private void OnManipulationCompleted(object sender, ManipulationCompletedRoutedEventArgs e)
         {
-            if (e.Cumulative.Translation.X<-100)
+            if (e.Cumulative.Translation.X < -100)
             {
                 MoveForward();
             }
 
-            if (e.Cumulative.Translation.X >100)
+            if (e.Cumulative.Translation.X > 100)
             {
                 MoveBackward();
             }
@@ -207,10 +207,11 @@ namespace Marduk.Controls
                 return;
 
             int sliceLength = (int)Math.Ceiling((double)this.Children.Count / 2);
+            bool equallyDivided = (this.Children.Count % 2 == 0);
 
             int pointer = targetIndex;
 
-            for (int i = 0; i < sliceLength; i++)
+            for (int i = 0; i < (!equallyDivided ? sliceLength : sliceLength + 1); i++)
             {
                 pointer = (targetIndex + i) % this.Children.Count;
 
@@ -334,7 +335,6 @@ namespace Marduk.Controls
         }
 
         #endregion
-
 
         protected override Size MeasureOverride(Size availableSize)
         {
