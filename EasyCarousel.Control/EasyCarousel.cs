@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -100,7 +100,6 @@ namespace Marduk.Controls
             _carouselCompositor = carouselVisual.Compositor;
 
             this.Tapped += OnTapped;
-
         }
 
         #region Event handlers
@@ -158,7 +157,6 @@ namespace Marduk.Controls
 
             foreach (object item in (IEnumerable)ItemsSource)
                 this.CreateItem(item);
-
         }
 
         private void CreateItem(object item)
@@ -282,12 +280,15 @@ namespace Marduk.Controls
         }
 
         #region Public methods
-        
+
         /// <summary>
         /// Move forward.
         /// </summary>
         public void MoveForward()
         {
+            if (!this.Children.Any())
+                return;
+
             if (SelectedIndex == this.Children.Count - 1)
             {
                 SelectedIndex = 0;
@@ -303,6 +304,9 @@ namespace Marduk.Controls
         /// </summary>
         public void MoveBackward()
         {
+            if (!this.Children.Any())
+                return;
+
             if (SelectedIndex == 0)
             {
                 SelectedIndex = this.Children.Count - 1;
@@ -320,6 +324,9 @@ namespace Marduk.Controls
         {
             _viewportRect = this.Clip = new RectangleGeometry { Rect = new Rect(0, 0, availableSize.Width, availableSize.Height) };
 
+            if (!this.Children.Any())
+                return (availableSize);
+
             foreach (var uiElement in this.Children)
             {
                 var container = (FrameworkElement)uiElement;
@@ -333,10 +340,10 @@ namespace Marduk.Controls
         {
             _viewportRect = this.Clip = new RectangleGeometry { Rect = new Rect(0, 0, finalSize.Width, finalSize.Height) };
 
-            if (SelectedIndex == -1 || !this.Children.Any() || SelectedIndex >= this.Children.Count)
+            if (!this.Children.Any())
                 return finalSize;
-            
-            var selectedElement = this.Children[this.SelectedIndex];
+
+            var selectedElement = this.Children[SelectedIndex];
 
             Double centerX = (finalSize.Width / 2) - (ItemWidth / 2);
             Double centerY = (finalSize.Height - selectedElement.DesiredSize.Height) / 2;
