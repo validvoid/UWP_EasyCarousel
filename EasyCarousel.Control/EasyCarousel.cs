@@ -99,15 +99,31 @@ namespace Marduk.Controls
             Visual carouselVisual = ElementCompositionPreview.GetElementVisual(this);
             _carouselCompositor = carouselVisual.Compositor;
 
-            this.Tapped += OnTapped;
-        }
+            this.ManipulationMode=ManipulationModes.TranslateX;
 
+            this.Tapped += OnTapped;
+            this.ManipulationCompleted += OnManipulationCompleted;
+        }
+        
         #region Event handlers
 
         private void OnTapped(object sender, TappedRoutedEventArgs args)
         {
             FrameworkElement fxElement = args.OriginalSource as FrameworkElement;
             ItemTapped(sender, fxElement);
+        }
+
+        private void OnManipulationCompleted(object sender, ManipulationCompletedRoutedEventArgs e)
+        {
+            if (e.Cumulative.Translation.X<-100)
+            {
+                MoveForward();
+            }
+
+            if (e.Cumulative.Translation.X >100)
+            {
+                MoveBackward();
+            }
         }
 
         private static void OnSelectedIndexChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
