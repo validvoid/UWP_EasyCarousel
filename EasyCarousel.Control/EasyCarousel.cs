@@ -75,18 +75,18 @@ namespace Marduk.Controls
 
         public double ItemSpacing
         {
-            get { return (double)GetValue(ItemSpacingProperty); }
+            get { return Convert.ToDouble(GetValue(ItemSpacingProperty)); }
             set { SetValue(ItemSpacingProperty, value); }
         }
+
+        public static readonly DependencyProperty ItemSpacingProperty =
+            DependencyProperty.Register("ItemSpacing", typeof(double), typeof(EasyCarousel), new PropertyMetadata(0, null));
 
         public DataTemplate ItemTemplate
         {
             get { return _itemTemplate; }
             set { _itemTemplate = value; }
         }
-
-        public static readonly DependencyProperty ItemSpacingProperty =
-            DependencyProperty.Register("ItemSpacing", typeof(double), typeof(EasyCarousel), new PropertyMetadata(0, null));
 
         #endregion
 
@@ -142,7 +142,7 @@ namespace Marduk.Controls
             if (DesignMode.DesignModeEnabled)
                 return;
 
-            instance.ShiftItemsAnimatedly((int)e.NewValue);
+            instance.ShiftElementsAnimatedly((int)e.NewValue);
         }
 
         private static void OnItemsSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -172,10 +172,10 @@ namespace Marduk.Controls
             this.Children.Clear();
 
             foreach (object item in (IEnumerable)ItemsSource)
-                this.CreateItem(item);
+                this.CreateElement(item);
         }
 
-        private void CreateItem(object item)
+        private void CreateElement(object item)
         {
             FrameworkElement element;
 
@@ -201,7 +201,7 @@ namespace Marduk.Controls
         /// Shift items with composition-powered animations.
         /// </summary>
         /// <param name="targetIndex"></param>
-        private void ShiftItemsAnimatedly(int targetIndex)
+        private void ShiftElementsAnimatedly(int targetIndex)
         {
             if (targetIndex < 0 || this.Children.Count <= 0)
                 return;
@@ -217,22 +217,10 @@ namespace Marduk.Controls
 
                 UIElement element = this.Children[pointer];
 
-                double offsetX = i * ItemWidth;
-
-                Visual elementVisual = ElementCompositionPreview.GetElementVisual(element);
+                double offsetX = i * (ItemWidth + ItemSpacing);
 
                 //Do not animate elements outside of the viewport.
-                if (Math.Abs(offsetX) > _viewportRect.Rect.Width)
-                {
-                    elementVisual.Offset = new Vector3((float)offsetX, elementVisual.Offset.Y, elementVisual.Offset.Z);
-                }
-                else
-                {
-                    var scalarAnimation = _carouselCompositor.CreateScalarKeyFrameAnimation();
-                    scalarAnimation.Duration = TimeSpan.FromMilliseconds(Duration);
-                    scalarAnimation.InsertKeyFrame(1f, (float)offsetX);
-                    elementVisual.StartAnimation("Offset.X", scalarAnimation);
-                }
+                ShiftElement(element, offsetX, Math.Abs(offsetX) < _viewportRect.Rect.Width);
             }
 
             for (int i = 1; i < sliceLength; i++)
@@ -241,22 +229,10 @@ namespace Marduk.Controls
 
                 UIElement element = this.Children[pointer];
 
-                double offsetX = (i - sliceLength) * ItemWidth;
-
-                Visual elementVisual = ElementCompositionPreview.GetElementVisual(element);
+                double offsetX = (i - sliceLength) * (ItemWidth + ItemSpacing);
 
                 //Do not animate elements outside of the viewport.
-                if (Math.Abs(offsetX) > _viewportRect.Rect.Width)
-                {
-                    elementVisual.Offset = new Vector3((float)offsetX, elementVisual.Offset.Y, elementVisual.Offset.Z);
-                }
-                else
-                {
-                    var scalarAnimation = _carouselCompositor.CreateScalarKeyFrameAnimation();
-                    scalarAnimation.Duration = TimeSpan.FromMilliseconds(Duration);
-                    scalarAnimation.InsertKeyFrame(1f, (float)offsetX);
-                    elementVisual.StartAnimation("Offset.X", scalarAnimation);
-                }
+                ShiftElement(element, offsetX, Math.Abs(offsetX) < _viewportRect.Rect.Width);
             }
         }
 
@@ -264,7 +240,7 @@ namespace Marduk.Controls
         /// Shift items with classic TranslateTransforms.
         /// </summary>
         /// <param name="targetIndex"></param>
-        private void ShiftItems(int targetIndex)
+        private void ShiftElements(int targetIndex)
         {
             if (targetIndex < 0 || this.Children.Count <= 0)
                 return;
@@ -293,6 +269,23 @@ namespace Marduk.Controls
                 double offsetX = (i - sliceLength) * ItemWidth;
 
                 element.RenderTransform = new TranslateTransform { X = offsetX };
+            }
+        }
+
+        private void ShiftElement(UIElement element, double offsetX, bool useAnimation)
+        {
+            Visual elementVisual = ElementCompositionPreview.GetElementVisual(element);
+
+            if (useAnimation)
+            {
+                var scalarAnimation = _carouselCompositor.CreateScalarKeyFrameAnimation();
+                scalarAnimation.Duration = TimeSpan.FromMilliseconds(Duration);
+                scalarAnimation.InsertKeyFrame(1f, (float)offsetX - (float)ItemSpacing);
+                elementVisual.StartAnimation("Offset.X", scalarAnimation);
+            }
+            else
+            {
+                elementVisual.Offset = new Vector3((float)offsetX - (float)ItemSpacing, elementVisual.Offset.Y, elementVisual.Offset.Z);
             }
         }
 
@@ -371,16 +364,15 @@ namespace Marduk.Controls
                 if (double.IsNaN(element.DesiredSize.Width) || double.IsNaN(element.DesiredSize.Height))
                     continue;
 
-                var rect = new Rect(centerX, centerY, element.DesiredSize.Width, element.DesiredSize.Height);
+                var rect = new Rect(centerX + ItemSpacing, centerY, element.DesiredSize.Width, element.DesiredSize.Height);
 
                 element.Arrange(rect);
-
             }
 
             if (DesignMode.DesignModeEnabled)
                 return finalSize;
 
-            ShiftItemsAnimatedly(SelectedIndex);
+            ShiftElementsAnimatedly(SelectedIndex);
 
             return finalSize;
         }
