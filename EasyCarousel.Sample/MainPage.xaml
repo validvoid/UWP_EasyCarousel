@@ -12,9 +12,10 @@
         <Grid.RowDefinitions>
             <RowDefinition/>
             <RowDefinition/>
-            <RowDefinition/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <controls:EasyCarousel x:Name="EasyCarousel" ItemWidth="300" SelectedIndex="8" ItemTapped="nc_ItemTapped" Duration="{Binding Value, ElementName=slider}">
+        <controls:EasyCarousel x:Name="EasyCarousel" ItemWidth="300" ItemSpacing="{Binding Value, ElementName=slider1}" SelectedIndex="0" ItemTapped="nc_ItemTapped" Duration="{Binding Value, ElementName=slider}" AutoShift="{Binding IsChecked, ElementName=checkBox}" ShiftingDirection="{Binding SelectedValue, ElementName=comboBox}">
             <controls:EasyCarousel.ItemTemplate>
                 <DataTemplate>
                     <Grid>
@@ -29,10 +30,22 @@
         <Button x:Name="button" Content="&lt;" HorizontalAlignment="Left" VerticalAlignment="Stretch" Click="button_Click"/>
         <Button x:Name="button1" Content="&gt;" HorizontalAlignment="Right" VerticalAlignment="Stretch" Click="button1_Click"/>
         <TextBlock Text="{Binding SelectedIndex, ElementName=EasyCarousel}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="48" Foreground="Red" Grid.Row="1" FontWeight="Bold"/>
-        <StackPanel Orientation="Vertical" Grid.Row="2" Margin="12">
-            <TextBlock x:Name="textBlock" TextWrapping="Wrap" Text="Duration:"/>
-            <TextBlock x:Name="textBlock1" HorizontalAlignment="Center" TextWrapping="Wrap" Text="{Binding Value, ElementName=slider}" VerticalAlignment="Top" Foreground="#FF0074FF" FontSize="20"/>
-            <Slider x:Name="slider" VerticalAlignment="Top" Maximum="1000" StepFrequency="10" Minimum="300" Value="300" Margin="0,12,0,0"/>
+        <StackPanel Margin="12,12,12,12" Orientation="Vertical" Grid.Row="2">
+            <StackPanel Orientation="Vertical">
+                <TextBlock x:Name="textBlock" TextWrapping="Wrap" Text="Duration:"/>
+                <TextBlock x:Name="textBlock1" HorizontalAlignment="Center" TextWrapping="Wrap" Text="{Binding Value, ElementName=slider}" VerticalAlignment="Top" Foreground="#FF0074FF" FontSize="20"/>
+                <Slider x:Name="slider" VerticalAlignment="Top" Maximum="1000" StepFrequency="10" Minimum="300" Value="300" Margin="0,12,0,0"/>
+            </StackPanel>
+            <StackPanel Orientation="Vertical">
+                <TextBlock x:Name="textBlock2" TextWrapping="Wrap" Text="ItemSpacing:"/>
+                <TextBlock x:Name="textBlock3" HorizontalAlignment="Center" TextWrapping="Wrap" Text="{Binding Value, ElementName=slider1}" VerticalAlignment="Top" Foreground="#FF0074FF" FontSize="20"/>
+                <Slider x:Name="slider1" VerticalAlignment="Top" Maximum="300" StepFrequency="10" Minimum="0" Value="30" Margin="0,12,0,0"/>
+            </StackPanel>
+        </StackPanel>
+        <Rectangle HorizontalAlignment="Center" Width="1" StrokeThickness="0" Fill="Red"/>
+        <StackPanel Margin="12,12,12,12" Grid.Row="3" Orientation="Horizontal">
+            <CheckBox x:Name="checkBox" Content="Auto shift" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+            <ComboBox x:Name="comboBox" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
         </StackPanel>
     </Grid>
 </Page>

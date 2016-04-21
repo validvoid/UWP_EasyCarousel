@@ -48,6 +48,15 @@ namespace Marduk.Samples
             };
 
             EasyCarousel.ItemsSource = testItems;
+
+            var directions = new List<Controls.EasyCarousel.CarouselShiftingDirection>()
+            {
+                Controls.EasyCarousel.CarouselShiftingDirection.Forward,
+                Controls.EasyCarousel.CarouselShiftingDirection.Backward
+            };
+
+            comboBox.ItemsSource = directions;
+            comboBox.SelectedIndex = 0;
         }
 
         private void button_Click(object sender, RoutedEventArgs e)
