@@ -24,6 +24,8 @@ namespace Marduk.Controls
 
         private Compositor _carouselCompositor;
 
+        private DispatcherTimer _timer;
+
         public event EventHandler<FrameworkElement> ItemTapped;
 
         #region Properties
@@ -80,7 +82,7 @@ namespace Marduk.Controls
         }
 
         public static readonly DependencyProperty ItemSpacingProperty =
-            DependencyProperty.Register("ItemSpacing", typeof(double), typeof(EasyCarousel), new PropertyMetadata(0, null));
+            DependencyProperty.Register("ItemSpacing", typeof(double), typeof(EasyCarousel), new PropertyMetadata(0, OnItemSpacingChanged));
 
         public DataTemplate ItemTemplate
         {
@@ -88,9 +90,38 @@ namespace Marduk.Controls
             set { _itemTemplate = value; }
         }
 
+        public bool AutoShift
+        {
+            get { return (bool)(GetValue(AutoShiftProperty)); }
+            set { SetValue(AutoShiftProperty, value); }
+        }
+
+        public static readonly DependencyProperty AutoShiftProperty =
+            DependencyProperty.Register("AutoShift", typeof(bool), typeof(EasyCarousel), new PropertyMetadata(false, OnAutoShiftChanged));
+
+        public TimeSpan Interval
+        {
+            get { return (TimeSpan)(GetValue(IntervalProperty)); }
+            set { SetValue(IntervalProperty, value); }
+        }
+
+        public static readonly DependencyProperty IntervalProperty =
+            DependencyProperty.Register("Interval", typeof(TimeSpan), typeof(EasyCarousel), new PropertyMetadata(TimeSpan.FromSeconds(3), OnIntervalChanged));
+
+        public CarouselShiftingDirection ShiftingDirection
+        {
+            get { return (CarouselShiftingDirection)GetValue(ShiftingDirectionProperty); }
+            set { SetValue(ShiftingDirectionProperty, value); }
+        }
+
+        public static readonly DependencyProperty ShiftingDirectionProperty =
+            DependencyProperty.Register("ShiftingDirection", typeof(CarouselShiftingDirection), typeof(EasyCarousel), new PropertyMetadata(CarouselShiftingDirection.Forward, null));
+
         #endregion
 
-
+        /// <summary>
+        /// Carousel Control
+        /// </summary>
         public EasyCarousel()
         {
             if (DesignMode.DesignModeEnabled)
@@ -98,11 +129,25 @@ namespace Marduk.Controls
 
             Visual carouselVisual = ElementCompositionPreview.GetElementVisual(this);
             _carouselCompositor = carouselVisual.Compositor;
+            _timer = new DispatcherTimer();
+            _timer.Interval = this.Interval;
 
             this.ManipulationMode = ManipulationModes.TranslateX;
 
             this.Tapped += OnTapped;
             this.ManipulationCompleted += OnManipulationCompleted;
+            _timer.Tick += (sender, o) =>
+            {
+                switch (this.ShiftingDirection)
+                {
+                    case CarouselShiftingDirection.Forward:
+                        MoveForward();
+                        break;
+                    case CarouselShiftingDirection.Backward:
+                        MoveBackward();
+                        break;
+                }
+            };
         }
 
         #region Event handlers
@@ -161,8 +206,63 @@ namespace Marduk.Controls
             instance.BindItems();
         }
 
-        #endregion
+        private static void OnItemSpacingChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (e.NewValue == null)
+                return;
 
+            if (e.NewValue == e.OldValue)
+                return;
+
+            EasyCarousel instance = d as EasyCarousel;
+
+            if (instance == null)
+                return;
+
+            instance.InvalidateArrange();
+        }
+
+        private static void OnAutoShiftChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (e.NewValue == null)
+                return;
+
+            if (e.NewValue == e.OldValue)
+                return;
+
+            EasyCarousel instance = d as EasyCarousel;
+
+            if (instance == null)
+                return;
+
+            if ((bool)e.NewValue)
+            {
+                instance._timer.Interval = instance.Interval;
+                instance._timer.Start();
+            }
+            else
+            {
+                instance._timer.Stop();
+            }
+        }
+
+        private static void OnIntervalChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (e.NewValue == null)
+                return;
+
+            if (e.NewValue == e.OldValue)
+                return;
+
+            EasyCarousel instance = d as EasyCarousel;
+
+            if (instance == null)
+                return;
+
+            instance._timer.Interval = (TimeSpan)e.NewValue;
+        }
+
+        #endregion
 
         private void BindItems()
         {
@@ -375,6 +475,12 @@ namespace Marduk.Controls
             ShiftElementsAnimatedly(SelectedIndex);
 
             return finalSize;
+        }
+
+        public enum CarouselShiftingDirection
+        {
+            Forward = 0,
+            Backward = 1
         }
     }
 }
