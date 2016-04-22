@@ -288,9 +288,6 @@ namespace Marduk.Controls
                 element = new TextBlock();
             }
 
-            if (element == null)
-                return;
-
             element.DataContext = item;
             element.RenderTransformOrigin = new Point(0.5, 0.5);
 
