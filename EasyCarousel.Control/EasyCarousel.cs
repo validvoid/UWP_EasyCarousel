@@ -39,6 +39,15 @@ namespace Marduk.Controls
         public static readonly DependencyProperty SelectedIndexProperty =
             DependencyProperty.Register("SelectedIndex", typeof(int), typeof(EasyCarousel), new PropertyMetadata(0, OnSelectedIndexChanged));
 
+        public object SelectedItem
+        {
+            get { return (int)GetValue(SelectedItemProperty); }
+            private set { SetValue(SelectedItemProperty, value); }
+        }
+
+        public static readonly DependencyProperty SelectedItemProperty =
+            DependencyProperty.Register("SelectedItem", typeof(object), typeof(EasyCarousel), new PropertyMetadata(null, null));
+
         public double Duration
         {
             get { return (double)GetValue(DurationProperty); }
@@ -214,6 +223,8 @@ namespace Marduk.Controls
                 return;
 
             instance.ShiftElementsAnimatedly((int)e.NewValue);
+
+            instance.SelectedItem = (instance.Children[(int)e.NewValue] as FrameworkElement)?.DataContext;
         }
 
         private static void OnItemsSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
