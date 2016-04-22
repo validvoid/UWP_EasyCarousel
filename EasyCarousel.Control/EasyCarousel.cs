@@ -90,6 +90,15 @@ namespace Marduk.Controls
             set { _itemTemplate = value; }
         }
 
+        public bool DetectPointerWheelChange
+        {
+            get { return (bool)(GetValue(DetectPointerWheelChangeProperty)); }
+            set { SetValue(DetectPointerWheelChangeProperty, value); }
+        }
+
+        public static readonly DependencyProperty DetectPointerWheelChangeProperty =
+            DependencyProperty.Register("DetectPointerWheelChange", typeof(bool), typeof(EasyCarousel), new PropertyMetadata(true, null));
+
         public bool AutoShift
         {
             get { return (bool)(GetValue(AutoShiftProperty)); }
@@ -136,6 +145,7 @@ namespace Marduk.Controls
 
             this.Tapped += OnTapped;
             this.ManipulationCompleted += OnManipulationCompleted;
+            this.PointerWheelChanged += OnPointerWheelChanged;
             _timer.Tick += (sender, o) =>
             {
                 switch (this.ShiftingDirection)
@@ -168,6 +178,22 @@ namespace Marduk.Controls
             if (e.Cumulative.Translation.X > 100)
             {
                 MoveBackward();
+            }
+        }
+
+        private void OnPointerWheelChanged(object sender, PointerRoutedEventArgs e)
+        {
+            e.Handled = true;
+            if (DetectPointerWheelChange)
+            {
+                if (e.GetCurrentPoint(this).Properties.MouseWheelDelta>0)
+                {
+                    MoveForward();
+                }
+                else
+                {
+                    MoveBackward();
+                }
             }
         }
 
@@ -287,6 +313,9 @@ namespace Marduk.Controls
             {
                 element = new TextBlock();
             }
+
+            if (element == null)
+                return;
 
             element.DataContext = item;
             element.RenderTransformOrigin = new Point(0.5, 0.5);
@@ -439,6 +468,7 @@ namespace Marduk.Controls
 
                 container.Measure(new Size(ItemWidth, ItemHeight));
             }
+
             return (availableSize);
         }
 
