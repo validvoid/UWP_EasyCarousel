@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -147,8 +148,7 @@ namespace Marduk.Controls
 
             Visual carouselVisual = ElementCompositionPreview.GetElementVisual(this);
             _carouselCompositor = carouselVisual.Compositor;
-            _timer = new DispatcherTimer();
-            _timer.Interval = this.Interval;
+            _timer = new DispatcherTimer {Interval = this.Interval};
 
             this.ManipulationMode = ManipulationModes.TranslateX;
 
@@ -241,6 +241,8 @@ namespace Marduk.Controls
                 return;
 
             instance.BindItems();
+
+            instance.SelectedItem = (instance.Children[instance.SelectedIndex] as FrameworkElement)?.DataContext;
         }
 
         private static void OnItemSpacingChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -316,9 +318,9 @@ namespace Marduk.Controls
         {
             FrameworkElement element;
 
-            if (ItemTemplate != null)
+            if (this.ItemTemplate != null)
             {
-                element = ItemTemplate.LoadContent() as FrameworkElement;
+                element = this.ItemTemplate.LoadContent() as FrameworkElement;
             }
             else
             {
@@ -354,7 +356,7 @@ namespace Marduk.Controls
 
                 UIElement element = this.Children[pointer];
 
-                double offsetX = i * (ItemWidth + ItemSpacing);
+                double offsetX = i * (this.ItemWidth + this.ItemSpacing);
 
                 //Do not animate elements outside of the viewport.
                 ShiftElement(element, offsetX, Math.Abs(offsetX) < _viewportRect.Rect.Width);
@@ -366,7 +368,7 @@ namespace Marduk.Controls
 
                 UIElement element = this.Children[pointer];
 
-                double offsetX = (i - sliceLength) * (ItemWidth + ItemSpacing);
+                double offsetX = (i - sliceLength) * (this.ItemWidth + this.ItemSpacing);
 
                 //Do not animate elements outside of the viewport.
                 ShiftElement(element, offsetX, Math.Abs(offsetX) < _viewportRect.Rect.Width);
@@ -392,7 +394,7 @@ namespace Marduk.Controls
 
                 UIElement element = this.Children[pointer];
 
-                double offsetX = i * ItemWidth;
+                double offsetX = i * this.ItemWidth;
 
                 element.RenderTransform = new TranslateTransform { X = offsetX };
             }
@@ -403,7 +405,7 @@ namespace Marduk.Controls
 
                 UIElement element = this.Children[pointer];
 
-                double offsetX = (i - sliceLength) * ItemWidth;
+                double offsetX = (i - sliceLength) * this.ItemWidth;
 
                 element.RenderTransform = new TranslateTransform { X = offsetX };
             }
@@ -417,12 +419,12 @@ namespace Marduk.Controls
             {
                 var scalarAnimation = _carouselCompositor.CreateScalarKeyFrameAnimation();
                 scalarAnimation.Duration = TimeSpan.FromMilliseconds(Duration);
-                scalarAnimation.InsertKeyFrame(1f, (float)offsetX - (float)ItemSpacing);
+                scalarAnimation.InsertKeyFrame(1f, (float)offsetX - (float)this.ItemSpacing);
                 elementVisual.StartAnimation("Offset.X", scalarAnimation);
             }
             else
             {
-                elementVisual.Offset = new Vector3((float)offsetX - (float)ItemSpacing, elementVisual.Offset.Y, elementVisual.Offset.Z);
+                elementVisual.Offset = new Vector3((float)offsetX - (float)this.ItemSpacing, elementVisual.Offset.Y, elementVisual.Offset.Z);
             }
         }
 
@@ -436,9 +438,9 @@ namespace Marduk.Controls
             if (!this.Children.Any())
                 return;
 
-            if (SelectedIndex == this.Children.Count - 1)
+            if (this.SelectedIndex == this.Children.Count - 1)
             {
-                SelectedIndex = 0;
+                this.SelectedIndex = 0;
             }
             else
             {
@@ -454,9 +456,9 @@ namespace Marduk.Controls
             if (!this.Children.Any())
                 return;
 
-            if (SelectedIndex == 0)
+            if (this.SelectedIndex == 0)
             {
-                SelectedIndex = this.Children.Count - 1;
+                this.SelectedIndex = this.Children.Count - 1;
             }
             else
             {
@@ -477,7 +479,7 @@ namespace Marduk.Controls
             {
                 var container = (FrameworkElement)uiElement;
 
-                container.Measure(new Size(ItemWidth, ItemHeight));
+                container.Measure(new Size(this.ItemWidth, this.ItemHeight));
             }
 
             return (availableSize);
@@ -502,15 +504,13 @@ namespace Marduk.Controls
                 if (double.IsNaN(element.DesiredSize.Width) || double.IsNaN(element.DesiredSize.Height))
                     continue;
 
-                var rect = new Rect(centerX + ItemSpacing, centerY, element.DesiredSize.Width, element.DesiredSize.Height);
+                var rect = new Rect(centerX + this.ItemSpacing, centerY, element.DesiredSize.Width, element.DesiredSize.Height);
 
                 element.Arrange(rect);
             }
 
-            if (DesignMode.DesignModeEnabled)
-                return finalSize;
-
-            ShiftElementsAnimatedly(SelectedIndex);
+            if (!DesignMode.DesignModeEnabled)
+                ShiftElementsAnimatedly(SelectedIndex);
 
             return finalSize;
         }

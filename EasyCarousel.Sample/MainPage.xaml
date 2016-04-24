@@ -29,7 +29,20 @@
         </controls:EasyCarousel>
         <Button x:Name="button" Content="&lt;" HorizontalAlignment="Left" VerticalAlignment="Stretch" Click="button_Click"/>
         <Button x:Name="button1" Content="&gt;" HorizontalAlignment="Right" VerticalAlignment="Stretch" Click="button1_Click"/>
-        <TextBlock Text="{Binding SelectedIndex, ElementName=EasyCarousel}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="48" Foreground="Red" Grid.Row="1" FontWeight="Bold"/>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Vertical" Margin="12">
+                <TextBlock x:Name="textBlock4" TextWrapping="Wrap" Text="SelectedIndex:"/>
+                <TextBlock Text="{Binding SelectedIndex, ElementName=EasyCarousel}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="48" Foreground="Red" FontWeight="Bold"/>
+            </StackPanel>
+            <StackPanel Orientation="Vertical" Margin="12,12.167,12,11.833" Grid.Column="1">
+                <TextBlock x:Name="textBlock5" TextWrapping="Wrap" Text="SelectedItem:"/>
+                <TextBlock Text="{Binding SelectedItem, ElementName=EasyCarousel, Mode=OneWay}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="36" Foreground="#FF00C5FF" FontWeight="Bold"/>
+            </StackPanel>
+        </Grid>
         <StackPanel Margin="12,12,12,12" Orientation="Vertical" Grid.Row="2">
             <StackPanel Orientation="Vertical">
                 <TextBlock x:Name="textBlock" TextWrapping="Wrap" Text="Duration:"/>
